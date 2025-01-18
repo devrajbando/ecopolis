@@ -7,7 +7,7 @@ import MapComponent from './components/MapComponent';
 import "./App.css";
 
 const App = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   return (
     <div className="App">
       <Router>

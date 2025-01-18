@@ -2,9 +2,12 @@ import React, { useState } from "react";
 import AnimatedContent from "../UI/AnimateContent";
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'; // Install react-leaflet for map support
 import 'leaflet/dist/leaflet.css'; // Leaflet styles
-import tree from "../assets/undraw_quiet-street_v45k.svg"
+import tree from "../assets/undraw_quiet-street_v45k.svg";
+import {useNavigate} from "react-router-dom"
+
 export default function Home() {
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -37,6 +40,7 @@ export default function Home() {
             <button
               type="button"
               className="bg-white text-left w-48 rounded-2xl h-14 relative font-sans text-black text-xl font-medium group my-4"
+              onClick={()=>navigate("/login")}
             >
               <div className="bg-green-600 rounded-xl h-12 w-1/4 flex items-center justify-center absolute right-1 top-[4px] group-hover:w-[184px] z-10 duration-500">
                 <svg

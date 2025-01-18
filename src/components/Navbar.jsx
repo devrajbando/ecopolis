@@ -17,16 +17,15 @@ export default function Navbar({setIsSidebarOpen, isSidebarOpen}) {
                     EcoPolis
                     </button>
                 </div>
-
                 
                 <div className="flex space-x-4">
-                    <button className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md font-medium">
+                    <button className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md font-medium" onClick={()=>navigate("/about")}>
                     About
                     </button>
                     <button className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md font-medium" onClick={()=>navigate("/map")}>
                     Map
                     </button>
-                    <button className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md font-medium">
+                    <button className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md font-medium" onClick={()=>navigate("/analysis")}>
                     Analysis
                     </button>
                     <button className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md font-medium">
@@ -35,7 +34,7 @@ export default function Navbar({setIsSidebarOpen, isSidebarOpen}) {
                     {location.pathname=="/map"?(<button className="bg-green-700 text-white hover:bg-green-900 px-4 py-2 rounded-md font-medium" onClick={()=> setIsSidebarOpen(!isSidebarOpen)}>
                     ChatBot
                     </button>):null}
-                    <button className="bg-green-700 text-white hover:bg-green-900 px-4 py-2 rounded-md font-medium">
+                    <button className="bg-green-700 text-white hover:bg-green-900 px-4 py-2 rounded-md font-medium" onClick={()=>navigate("/login")}>
                     Login
                     </button>
                 </div>
