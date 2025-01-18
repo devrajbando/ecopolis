@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { MapContainer, TileLayer, Marker, Tooltip, Rectangle, useMapEvent, useMap,Popup,Circle } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Tooltip, Rectangle, useMapEvent, useMap, Popup, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { POSITION_CLASSES, MouseMoveComponent,SetViewOnClick } from '../utils/MapUtils';
+import { POSITION_CLASSES, MouseMoveComponent, SetViewOnClick } from '../utils/MapUtils';
 import Chat from './ChatBot';
+import MapClickHandler from './MapClickHandler';
+import WeatherBiodiversityComponent from './WeatherBio';
 
 const BOUNDS_STYLE = { weight: 1 };
-const redOptions = { color: 'red' }
+const redOptions = { color: 'red' };
 
 function MinimapBounds({ parentMap, zoom }) {
   const minimap = useMap();
+  
   const onClick = useCallback(
     (e) => {
       parentMap.setView(e.latlng, parentMap.getZoom());
@@ -70,14 +73,16 @@ function MinimapControl({ position, zoom }) {
   );
 }
 
-const MapComponent = ({isSidebarOpen, setIsSidebarOpen}) => {
+const MapComponent = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const [mapTime, setMapTime] = useState("Biodiversity Map");
   const [selectedRadio, setSelectedRadio] = useState("Agriculture");
   const animateRef = useRef(false);
   const [coordinates, setCoordinates] = useState(null);
   const [lat, setLat] = useState(23.81);
   const [lon, setLon] = useState(86.44);
-  const [search,setSearch] = useState("Dhanbad");
+  const [search, setSearch] = useState("Dhanbad");
+  const [allData, setAllData] = useState({ biodiversityCount: null, weather: null });
+  const [clickedPoint, setClickedPoint] = useState(null);
 
   const handleMouseMove = (e) => {
     const { lat, lng } = e.latlng;
@@ -94,73 +99,61 @@ const MapComponent = ({isSidebarOpen, setIsSidebarOpen}) => {
     setMapTime(value === "raw" ? "real time map" : "old map");
   };
 
-  const searchLocation=async ()=>{
-    const token=import.meta.env.VITE_APP_GEOCODING_API_KEY
-    console.log(token)
-    const response= await fetch (`https://geocode.maps.co/search?q=${search}&api_key=${token}`,{
-      method: 'GET',
-          
-         
-    })
+  const searchLocation = async () => {
+    const token = import.meta.env.VITE_APP_GEOCODING_API_KEY;
+    const response = await fetch(`https://geocode.maps.co/search?q=${search}&api_key=${token}`, { method: 'GET' });
     const data = await response.json();
-    const lon=data[0].lon;
-    const lat=data[0].lat
-    setLat(lat)
-    setLon(lon)
-  }
+    setAllData({ biodiversityCount: null, weather: null });
+    setLat(data[0].lat);
+    setLon(data[0].lon);
+    setClickedPoint(null);
+  };
+
   const MapUpdater = ({ lat, lon }) => {
-    const map = useMap(); // Access the map instance
+    const map = useMap();
 
     useEffect(() => {
-      map.setView([lat, lon], map.getZoom()); // Update the map view to the new coordinates
+      map.setView([lat, lon], map.getZoom());
     }, [lat, lon, map]);
 
-    return null; // This component doesn't render anything
+    return null;
   };
 
   return (
     <div className="relative w-full h-screen">
-      <MapContainer 
-        center={[lat,lon]} 
-        zoom={15} 
-        className="h-full w-full z-0"
-      >
+      <MapContainer center={[lat, lon]} zoom={15} className="h-full w-full z-0">
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        <Marker position={[lat,lon]}>
+        <Marker position={[lat, lon]}>
           <Tooltip direction="bottom" permanent>{search}</Tooltip>
         </Marker>
         <MapUpdater lat={lat} lon={lon} />
         <SetViewOnClick animateRef={animateRef} />
         <MinimapControl position="topright" />
-        <MouseMoveComponent onMouseMove={(e)=>{handleMouseMove(e.target.value)}} />
-        <Circle center={[lat,lon]} pathOptions={redOptions} radius={200}>
+        <MouseMoveComponent onMouseMove={handleMouseMove} />
+        <Circle center={[lat, lon]} pathOptions={redOptions} radius={200}>
           <Popup>Popup in CircleMarker</Popup>
         </Circle>
+        <MapClickHandler setIsSidebarOpen={setIsSidebarOpen} setAllData={setAllData} allData={allData} clickedPoint={clickedPoint} setClickedPoint={setClickedPoint}/>
       </MapContainer>
 
-      {/* Search Input */}
       <div className="absolute top-2 left-14 w-[210px] h-[50px] z-20 flex items-center justify-center bg-gradient-to-b from-[#257548] to-[#25f1ad] rounded-full overflow-hidden shadow-md cursor-pointer">
-      <input
-        type="text"
-        name="text"
-        id="input"
-        value={search}
-        onChange={(e)=>setSearch(e.target.value)}
-        placeholder="Search your location"
-        className="w-[200px] h-[40px] border-none outline-none caret-orange-500 bg-white rounded-full pl-4 tracking-wide text-[13.4px] text-neutral-900"
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            searchLocation(); // Call the search function when Enter is pressed
-          }
-        }}
-      />
-    </div>
-
-
-  {/* Biodiversity Hotspot Dropdown */}
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search your location"
+          className="w-[200px] h-[40px] border-none outline-none caret-orange-500 bg-white rounded-full pl-4 tracking-wide text-[13.4px] text-neutral-900"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              searchLocation();
+              setSearch("");
+            }
+          }}
+        />
+      </div>
 
       <select
         onChange={handleMapChange}
@@ -173,46 +166,18 @@ const MapComponent = ({isSidebarOpen, setIsSidebarOpen}) => {
 
       <div className="absolute top-28 left-3 bg-white/80 border border-gray-300 rounded-md p-5 shadow-md z-10">
         <h2 className='font-bold text-black'>Use Case</h2>
-        <label className="flex items-center space-x-2">
-          <input 
-            type="radio" 
-            value="agriculture" 
-            checked={selectedRadio === "Agriculture"} 
-            onChange={() => handleRadioChange("Agriculture")}
-            className="form-radio"
-          />
-          <span>Agriculture</span>
-        </label>
-        <label className="flex items-center space-x-2">
-          <input 
-            type="radio" 
-            value="Residency" 
-            checked={selectedRadio === "Residency"} 
-            onChange={() => handleRadioChange("Residency")}
-            className="form-radio"
-          />
-          <span>Residency</span>
-        </label>
-        <label className="flex items-center space-x-2">
-          <input 
-            type="radio" 
-            value="Commercial" 
-            checked={selectedRadio === "Commercial"} 
-            onChange={() => handleRadioChange("Commercial")}
-            className="form-radio"
-          />
-          <span>Commercial</span>
-        </label>
-        <label className="flex items-center space-x-2">
-          <input 
-            type="radio" 
-            value="Transport" 
-            checked={selectedRadio === "Transport"} 
-            onChange={() => handleRadioChange("Transport")}
-            className="form-radio"
-          />
-          <span>Transport</span>
-        </label>
+        {["Agriculture", "Residency", "Commercial", "Transport"].map((value) => (
+          <label key={value} className="flex items-center space-x-2">
+            <input
+              type="radio"
+              value={value}
+              checked={selectedRadio === value}
+              onChange={() => handleRadioChange(value)}
+              className="form-radio"
+            />
+            <span>{value}</span>
+          </label>
+        ))}
       </div>
 
       <div className="absolute bottom-20 left-4 bg-white/80 p-2 rounded-md shadow-md z-10">
@@ -224,7 +189,10 @@ const MapComponent = ({isSidebarOpen, setIsSidebarOpen}) => {
           <p className="text-sm">Move the mouse over the map to get coordinates!</p>
         )}
       </div>
-      <Chat setIsSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen}/> 
+      <div className='absolute bottom-36 left-4 z-10 bg-white/80 p-2 rounded-md shadow-md'>
+        <WeatherBiodiversityComponent weatherData={allData.weather} biodiversityCount={allData.biodiversityCount}/>
+      </div>
+      <Chat setIsSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
     </div>
   );
 };

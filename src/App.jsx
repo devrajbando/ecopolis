@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import MapComponent from './components/MapComponent';
 import "./App.css";
+import SignInForm from './components/LoginPage';
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -15,7 +16,7 @@ const App = () => {
       <div className="">
           <Routes>
             <Route path="/" element={<Home />} />
-            {/* <Route path="/login" element={<LoginPage />} /> */}
+            <Route path="/login" element={<SignInForm />} />
             <Route path="/map" element={<MapComponent setIsSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen}/>} />
           </Routes>
       </div>
