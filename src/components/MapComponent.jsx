@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { MapContainer, TileLayer, Marker, Tooltip, Rectangle, useMapEvent, useMap,Popup,Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { POSITION_CLASSES, MouseMoveComponent,SetViewOnClick } from '../utils/MapUtils';
+import Chat from './ChatBot';
 
 const BOUNDS_STYLE = { weight: 1 };
 const redOptions = { color: 'red' }
@@ -69,7 +70,7 @@ function MinimapControl({ position, zoom }) {
   );
 }
 
-const MapComponent = () => {
+const MapComponent = ({isSidebarOpen, setIsSidebarOpen}) => {
   const [mapTime, setMapTime] = useState("Biodiversity Map");
   const [selectedRadio, setSelectedRadio] = useState("raw");
   const animateRef = useRef(false);
@@ -153,6 +154,7 @@ const MapComponent = () => {
           <p className="text-sm">Move the mouse over the map to get coordinates!</p>
         )}
       </div>
+      <Chat setIsSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen}/> 
     </div>
   );
 };

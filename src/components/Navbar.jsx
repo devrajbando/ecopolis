@@ -1,9 +1,10 @@
 import React from 'react';
 import { Leaf } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation } from 'react-router-dom';
 
-export default function Navbar() {
+export default function Navbar({setIsSidebarOpen, isSidebarOpen}) {
     const navigate  = useNavigate();
+    const location = useLocation();
     return (
         <>
             <nav className="bg-white shadow-lg sticky top-0 z-50">
@@ -31,6 +32,9 @@ export default function Navbar() {
                     <button className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md font-medium">
                     Upload
                     </button>
+                    {location.pathname=="/map"?(<button className="bg-green-700 text-white hover:bg-green-900 px-4 py-2 rounded-md font-medium" onClick={()=> setIsSidebarOpen(!isSidebarOpen)}>
+                    ChatBot
+                    </button>):null}
                     <button className="bg-green-700 text-white hover:bg-green-900 px-4 py-2 rounded-md font-medium">
                     Login
                     </button>

@@ -25,8 +25,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const Chat = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+const Chat = ({setIsSidebarOpen,isSidebarOpen}) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
 
@@ -78,21 +77,13 @@ const Chat = () => {
   };
 
   return (
-    <div className="relative">
-      {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-4/12 bg-green-300 shadow-lg transform transition-transform duration-300 ease-in-out ${
+        className={`z-10 fixed top-16 right-0 bottom-0 w-4/12 bg-green-300 shadow-lg transform transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        {/* Sidebar Header */}
-        <div className="p-4 border-b flex justify-end">
-          <button className="text-gray-500 hover:text-gray-700">
-            <X size={24} onClick={toggleSidebar} />
-          </button>
-        </div>
-
         {/* Messages Container */}
+        <X size={24} onClick={toggleSidebar} className="absolute top-5 left-5 text-black"/>
         <div
           className="overflow-y-auto p-4"
           style={{ height: "calc(100% - 230px)" }}
@@ -134,7 +125,6 @@ const Chat = () => {
           </button>
         </div>
       </div>
-    </div>
   );
 };
 
