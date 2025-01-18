@@ -144,7 +144,7 @@ const MapComponent = () => {
         </label>
       </div>
 
-      <div className="absolute bottom-4 left-4 bg-white/80 p-2 rounded-md shadow-md z-10">
+      <div className="absolute bottom-20 left-4 bg-white/80 p-2 rounded-md shadow-md z-10">
         {coordinates ? (
           <p className="text-sm">
             Latitude: {coordinates.lat}, Longitude: {coordinates.lng}

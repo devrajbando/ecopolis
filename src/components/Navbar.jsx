@@ -1,6 +1,9 @@
 import React from 'react';
 import { Leaf } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 export default function Navbar() {
+    const navigate  = useNavigate();
     return (
         <>
             <nav className="bg-white shadow-lg sticky top-0 z-50">
@@ -9,7 +12,7 @@ export default function Navbar() {
                
                 <div className="flex">
                 <Leaf className="h-6 mt-1 mr-2 w-6 text-green-500" />
-                    <button className="text-green-700 hover:text-gray-600 font-bold text-2xl">
+                    <button className="text-green-700 hover:text-gray-600 font-bold text-2xl" onClick={()=>navigate("/")}>
                     EcoPolis
                     </button>
                 </div>
@@ -19,7 +22,7 @@ export default function Navbar() {
                     <button className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md font-medium">
                     About
                     </button>
-                    <button className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md font-medium">
+                    <button className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md font-medium" onClick={()=>navigate("/map")}>
                     Map
                     </button>
                     <button className="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md font-medium">
