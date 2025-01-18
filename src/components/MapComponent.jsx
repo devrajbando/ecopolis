@@ -135,7 +135,7 @@ const MapComponent = ({isSidebarOpen, setIsSidebarOpen}) => {
         <MapUpdater lat={lat} lon={lon} />
         <SetViewOnClick animateRef={animateRef} />
         <MinimapControl position="topright" />
-        <MouseMoveComponent onMouseMove={handleMouseMove} />
+        <MouseMoveComponent onMouseMove={(e)=>{handleMouseMove(e.target.value)}} />
         <Circle center={[lat,lon]} pathOptions={redOptions} radius={200}>
           <Popup>Popup in CircleMarker</Popup>
         </Circle>
