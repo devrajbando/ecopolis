@@ -1,4 +1,5 @@
 import React from 'react';
+import { Leaf } from 'lucide-react';
 export default function Navbar() {
     return (
         <>
@@ -6,7 +7,8 @@ export default function Navbar() {
             <div className="max-w-6xl mx-auto">
                 <div className="flex justify-between items-center h-16">
                
-                <div className="flex-shrink-">
+                <div className="flex">
+                <Leaf className="h-6 mt-1 mr-2 w-6 text-green-500" />
                     <button className="text-green-700 hover:text-gray-600 font-bold text-2xl">
                     EcoPolis
                     </button>

@@ -1,19 +1,26 @@
-import { useState } from 'react'
-import React from 'react'
-import './App.css'
-import Home from './components/Home.jsx'
-import Navbar from './components/Navbar.jsx'
-import Footer from './components/Footer.jsx'
-function App() {
-  const [count, setCount] = useState(0)
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Home from './components/Home';
+import Footer from './components/Footer';
+import Navbar from './components/Navbar';
+import MapComponent from './components/MapComponent';
+import "./App.css";
 
+const App = () => {
   return (
-    <>
-      <Navbar/>
-      <Home />
-      <Footer/>
-    </>
+    <div className="App">
+      <Router>
+      <Navbar />
+      <div className="">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            {/* <Route path="/login" element={<LoginPage />} /> */}
+            <Route path="/map" element={<MapComponent />} />
+          </Routes>
+      </div>
+      </Router>
+      <Footer />
+    </div>
   )
 }
 
-export default App
+export default App;
