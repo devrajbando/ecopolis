@@ -75,7 +75,7 @@ function MinimapControl({ position, zoom }) {
 
 const MapComponent = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const [mapTime, setMapTime] = useState("Biodiversity Map");
-  const [selectedRadio, setSelectedRadio] = useState("Agriculture");
+  const [selectedRadio, setSelectedRadio] = useState("Agricultural");
   const animateRef = useRef(false);
   const [coordinates, setCoordinates] = useState(null);
   const [lat, setLat] = useState(23.81);
@@ -83,6 +83,7 @@ const MapComponent = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const [search, setSearch] = useState("Dhanbad");
   const [allData, setAllData] = useState({ biodiversityCount: null, weather: null });
   const [clickedPoint, setClickedPoint] = useState(null);
+  const [score,setScore] = useState("");
 
   const handleMouseMove = (e) => {
     const { lat, lng } = e.latlng;
@@ -136,7 +137,7 @@ const MapComponent = ({ isSidebarOpen, setIsSidebarOpen }) => {
         <Circle center={[lat, lon]} pathOptions={redOptions} radius={200}>
           <Popup>Popup in CircleMarker</Popup>
         </Circle>
-        <MapClickHandler setIsSidebarOpen={setIsSidebarOpen} setAllData={setAllData} allData={allData} clickedPoint={clickedPoint} setClickedPoint={setClickedPoint}/>
+        <MapClickHandler setIsSidebarOpen={setIsSidebarOpen} setAllData={setAllData} allData={allData} clickedPoint={clickedPoint} setClickedPoint={setClickedPoint} selectedRadio={selectedRadio} setScore={setScore}/>
       </MapContainer>
 
       <div className="absolute top-2 left-14 w-[210px] h-[50px] z-20 flex items-center justify-center bg-gradient-to-b from-[#257548] to-[#25f1ad] rounded-full overflow-hidden shadow-md cursor-pointer">
@@ -166,7 +167,7 @@ const MapComponent = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
       <div className="absolute top-28 left-3 bg-white/80 border border-gray-300 rounded-md p-5 shadow-md z-10">
         <h2 className='font-bold text-black'>Use Case</h2>
-        {["Agriculture", "Residency", "Commercial", "Transport"].map((value) => (
+        {["Agricultural", "Residential", "Commercial", "Eco-friendly"].map((value) => (
           <label key={value} className="flex items-center space-x-2">
             <input
               type="radio"
@@ -191,6 +192,10 @@ const MapComponent = ({ isSidebarOpen, setIsSidebarOpen }) => {
       </div>
       <div className='absolute bottom-36 left-4 z-10 bg-white/80 p-2 rounded-md shadow-md'>
         <WeatherBiodiversityComponent weatherData={allData.weather} biodiversityCount={allData.biodiversityCount}/>
+      </div>
+      <div className='absolute top-36 left-64 z-10 bg-white/80 p-2 rounded-md shadow-md'>
+        Score:{score.risk_score_prediction}<br></br>
+        {/* shap_analysis:{score.shap_analysis.explanation} */}
       </div>
       <Chat setIsSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
     </div>

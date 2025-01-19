@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMapEvents, Popup, Circle } from 'react-leaflet';
 
-const MapClickHandler = ({ setIsSidebarOpen, setAllData, allData, clickedPoint, setClickedPoint }) => {
+const MapClickHandler = ({ setIsSidebarOpen, setAllData, allData, clickedPoint, setClickedPoint,selectedRadio,setScore }) => {
 
   const map = useMapEvents({
     click: (e) => {
@@ -27,23 +27,34 @@ const MapClickHandler = ({ setIsSidebarOpen, setAllData, allData, clickedPoint, 
 
       setAllData({ biodiversityCount: count, weather: weatherData });
       localStorage.setItem("data", JSON.stringify({ biodiversityCount: count, weather: weatherData }));
-
-      // const oldData = JSON.parse(localStorage.getItem("chatMessages")) || [];
-
-      // console.log("old data", oldData);
-
-      // const newData = [
-      //   ...oldData, 
-      //   { role: "developer", content: { biodiversityCount: count, weatherData } }
-      // ];
-
-      // console.log("new data", newData);
-
-      // localStorage.setItem("chatMessages", JSON.stringify(newData));
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
+
+  const modelWork = async()=>{
+    try {
+      const input = {latitude:clickedPoint.lat.toFixed(4),longitude:clickedPoint.lng.toFixed(4),use_case_type:selectedRadio};
+      console.log(input);
+      const response = await fetch('http://localhost:5010/analyze', {
+          method: 'POST',
+         
+          headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(
+          input
+        ),
+        });
+      
+      const data = await response.json();
+      console.log(data);
+      setScore(data);
+      
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   useEffect(() => {
     if (allData) {
@@ -54,6 +65,7 @@ const MapClickHandler = ({ setIsSidebarOpen, setAllData, allData, clickedPoint, 
   const handleClick = async () => {
     if (clickedPoint) {
       await fetchData(clickedPoint.lat, clickedPoint.lng);
+      modelWork();
       setIsSidebarOpen('true');
     }
   };
