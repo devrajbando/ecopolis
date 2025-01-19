@@ -1,15 +1,7 @@
 import { X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  serverTimestamp,
-  query,
-  orderBy,
-} from "firebase/firestore";
+import { sendMsgToOpenAI } from "../utils/OpenAI";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBXQ1fCzfWAlu3QCUYc161lpVm0EpY9_x4",
@@ -23,26 +15,16 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
 const Chat = ({setIsSidebarOpen,isSidebarOpen}) => {
-  const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
 
-  // Fetch messages when component mounts
   useEffect(() => {
-    const fetchMessages = async () => {
-      const messagesRef = collection(db, "messages");
-      const q = query(messagesRef, orderBy("timestamp", "asc"));
-      const querySnapshot = await getDocs(q);
-      const fetchedMessages = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setMessages(fetchedMessages);
-    };
-
-    fetchMessages();
+    const savedMessages = localStorage.getItem("chatMessages");
+    if (savedMessages) {
+      setMessages(JSON.parse(savedMessages));
+    }
   }, []);
 
   const toggleSidebar = () => {
@@ -50,66 +32,84 @@ const Chat = ({setIsSidebarOpen,isSidebarOpen}) => {
   };
 
   const handleSend = async () => {
-    if (message.trim()) {
+      if (!input.trim()) return; // Prevent empty messages
+  
       try {
-        // Add to Firestore
-        const docRef = await addDoc(collection(db, "messages"), {
-          text: message,
-          timestamp: serverTimestamp(),
-        });
-
-        // Update local state
-        setMessages([
+        // Add user message to the chat
+        const updatedMessages = [...messages, { text: input, isBot: false }];
+        setMessages(updatedMessages);
+        localStorage.setItem("chatMessages", JSON.stringify(updatedMessages));
+  
+        // Get response from OpenAI
+        const res = await sendMsgToOpenAI(input);
+  
+        // Add bot response to the chat
+        const finalMessages = [...updatedMessages, { text: res, isBot: true }];
+        setMessages(finalMessages);
+        localStorage.setItem("chatMessages", JSON.stringify(finalMessages));
+  
+        // Clear input after sending
+        setInput("");
+      } catch (error) {
+        console.error("Error in handleSend:", error);
+        // Add error message to chat
+        const errorMessages = [
           ...messages,
           {
-            id: docRef.id,
-            text: message,
-            timestamp: new Date(),
+            text: "Sorry, there was an error processing your request.",
+            isBot: true,
           },
-        ]);
-
-        // Clear input
-        setMessage("");
-      } catch (error) {
-        console.error("Error sending message:", error);
+        ];
+        setMessages(errorMessages);
+        localStorage.setItem("chatMessages", JSON.stringify(errorMessages));
       }
-    }
-  };
-
-  return (
+    };
+  
+    return (
       <div
         className={`z-10 fixed top-16 right-0 bottom-0 w-4/12 bg-green-300 shadow-lg transform transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
+        <X
+          size={24}
+          onClick={toggleSidebar}
+          className="absolute top-5 left-5 text-black"
+        />
+  
         {/* Messages Container */}
-        <X size={24} onClick={toggleSidebar} className="absolute top-5 left-5 text-black"/>
         <div
           className="overflow-y-auto p-4"
           style={{ height: "calc(100% - 230px)" }}
         >
-          {messages.map((msg) => (
+          {messages.map((msg, index) => (
             <div
-              key={msg.id}
-              className="bg-white rounded-lg p-3 mb-2 shadow-sm max-w-[80%] ml-auto"
+              key={index}
+              className={`rounded-lg p-3 mb-2 shadow-sm max-w-[80%] ${
+                msg.isBot
+                  ? "bg-[#0f162b] text-white ml-0"
+                  : "bg-[#17a34b] text-white ml-auto"
+              }`}
             >
-              <p className="text-gray-800">{msg.text}</p>
-              <span className="text-xs text-gray-500">
-                {msg.timestamp?.toDate?.()
-                  ? msg.timestamp.toDate().toLocaleTimeString()
-                  : new Date().toLocaleTimeString()}
+              <p>{msg.text}</p>
+              <span
+                className={`text-xs ${
+                  msg.isBot ? "text-gray-300" : "text-white"
+                }`}
+              >
+                {new Date().toLocaleTimeString()}
               </span>
             </div>
           ))}
         </div>
-
+  
         {/* Textarea Container */}
-        <div className="p-4 bg-yellow-300 absolute bottom-0 w-full">
+        <div className="p-4 absolute bottom-0 w-full">
           <textarea
-            className="w-full h-32 p-2 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full h-32 p-2 border rounded-md resize-none focus:outline-none bg-gray-200 text-black"
             placeholder="Type your message here..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -117,15 +117,23 @@ const Chat = ({setIsSidebarOpen,isSidebarOpen}) => {
               }
             }}
           />
-          <button
-            onClick={handleSend}
-            className="mt-2 w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
-          >
-            Send
-          </button>
+          <div className="flex gap-5">
+            <button
+              onClick={handleSend}
+              className="mt-2 w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
+            >
+              Send
+            </button>
+            <button className="mt-2 w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors" onClick={()=>{
+              localStorage.removeItem("chatMessages");
+              setMessages([]);
+            }}>
+              Clear Chat
+            </button>
+          </div>
         </div>
       </div>
-  );
-};
-
-export default Chat;
+    );
+  };
+  
+  export default Chat;

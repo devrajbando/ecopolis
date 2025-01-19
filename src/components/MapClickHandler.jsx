@@ -26,6 +26,20 @@ const MapClickHandler = ({ setIsSidebarOpen, setAllData, allData, clickedPoint, 
       const weatherData = await weatherResponse.json();
 
       setAllData({ biodiversityCount: count, weather: weatherData });
+      localStorage.setItem("data", JSON.stringify({ biodiversityCount: count, weather: weatherData }));
+
+      // const oldData = JSON.parse(localStorage.getItem("chatMessages")) || [];
+
+      // console.log("old data", oldData);
+
+      // const newData = [
+      //   ...oldData, 
+      //   { role: "developer", content: { biodiversityCount: count, weatherData } }
+      // ];
+
+      // console.log("new data", newData);
+
+      // localStorage.setItem("chatMessages", JSON.stringify(newData));
     } catch (error) {
       console.error('Error fetching data:', error);
     }
